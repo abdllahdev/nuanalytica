@@ -9,6 +9,7 @@ Technologies used:
   <li>Pandas</li>
   <li>Numpy</li>
   <li>Textblob</li>
+  <li>Chart.js</li>
 </ul>
 <br>
 You can check the web application from here: https://nuanalytica.herokuapp.com/
