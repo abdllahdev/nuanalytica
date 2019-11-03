@@ -2,7 +2,7 @@
 <br>
 This project was a part of Introduction to Programming with Python course at Nile University.
 <br>
-Technologies used:
+Technologies and libraries used:
 <ul>
   <li>Django</li>
   <li>Tweepy</li>
