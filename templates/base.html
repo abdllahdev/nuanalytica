@@ -1,0 +1,237 @@
+{% load static %}
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+        <title>
+            {% block title %}{% endblock %}
+        </title>
+
+        <!-- Favicon-->
+        <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
+
+        <!-- Bootstrap Core Css -->
+        <link href="{% static "plugins/bootstrap/css/bootstrap.css" %}" rel="stylesheet">
+
+        <!-- Waves Effect Css -->
+        <link href="{% static "plugins/node-waves/waves.css" %}" rel="stylesheet" />
+
+        <!-- Animation Css -->
+        <link href="{% static "plugins/animate-css/animate.css" %}" rel="stylesheet" />
+
+        <!-- Custom Css -->
+        <link href="{% static "css/style.css" %}" rel="stylesheet">
+        <link href="{% static "css/custom.css" %}" rel="stylesheet">
+        <link href="{% static "css/themes/theme-green.css" %}" rel="stylesheet" />
+    </head>
+
+    <body class="theme-green ls-closed">
+        <div class="overlay"></div>
+        <nav class="navbar">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand col-white font-bold" href="{% url "analytica_app:app_view" %}">Analytica</a>
+                </div>
+            </div>
+        </nav>
+
+        <section class="content">
+            {% block content %}
+            {% endblock %}
+        </section>
+        
+        <!-- Jquery Core Js -->
+        <script src="{% static "plugins/jquery/jquery.min.js" %}"></script>
+
+        <!-- Bootstrap Core Js -->
+        <script src="{% static "plugins/bootstrap/js/bootstrap.js" %}"></script>
+
+        <!-- Select Plugin Js -->
+        <script src="{% static "plugins/bootstrap-select/js/bootstrap-select.js" %}"></script>
+
+        <!-- Slimscroll Plugin Js -->
+        <script src="{% static "plugins/jquery-slimscroll/jquery.slimscroll.js" %}"></script>
+
+        <!-- Waves Effect Plugin Js -->
+        <script src="{% static "plugins/node-waves/waves.js" %}"></script>
+
+        <!-- Sparkline Plugin Js -->
+        <script src="{% static "plugins/jquery-sparkline/jquery.sparkline.js" %}"></script> 
+
+        <!-- Custom Js -->
+        <script src="{% static "js/admin.js" %}"></script>
+        <script src="{% static "js/pages/charts/sparkline.js" %}"></script>
+        <script src="{% static "plugins/chartjs/Chart.bundle.js" %}"></script>
+
+        <!-- Demo Js -->
+        <script src="{% static "js/demo.js" %}"></script>
+        <script>
+            $(function() {
+                // Initializing Charts.js and creating graphs
+                var sentiment_graph = document.getElementById("sentiment_graph").getContext('2d');
+                var sentiment_over_time_graph = document.getElementById("sentiment_over_time_graph").getContext('2d');
+                var tweets_len_over_time_graph = document.getElementById("tweets_len_over_time_graph").getContext('2d');
+                var retweets_likes_over_time_graph = document.getElementById("retweets_likes_over_time_graph").getContext('2d');
+                
+                // Getting dates values from HTML elements
+                var dates = $("#dates").attr("values").split("|")
+                var sentiment_dates = $("#sentiment_over_time_graph").attr("dates").split("|")
+
+                // Getting graphs' values from html elements
+                var sentiment_graph_values = $("#sentiment_graph").attr("values").split("|")
+                var sentiment_over_time_graph_values = $("#sentiment_over_time_graph").attr("values").split("|")
+                var tweets_len_over_time_graph_values = $("#tweets_len_over_time_graph").attr("values").split("|")
+                var likes_over_time_graph_values = $("#retweets_likes_over_time_graph").attr("likes-values").split("|")
+                var retweets_over_time_graph_values = $("#retweets_likes_over_time_graph").attr("rts-values").split("|")
+
+                // Sentiment graph
+                var sentiment_graph = new Chart(sentiment_graph, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [
+                            {
+                                data: sentiment_graph_values,
+                                backgroundColor: [
+                                    "#1565C0",
+                                    "#43A047",
+                                    "#C62828",
+                                ],
+                            }
+                        ],
+                        labels: [
+                            "Neutral",
+                            "Positive",
+                            "Negative",
+                        ]
+                    },
+                    options: {}
+                });
+                // Helper fuction to get sentiment values
+                function sentiment_values_reader(sentiment_values, date_values) {
+                    values = [
+                        {
+                            label: "Positive",
+                            data: [],
+                            backgroundColor: 'rgba(0, 0, 0, 0)',
+                            pointBorderColor: '#43A047',
+                            pointBackgroundColor: '#43A047',
+                            pointBorderWidth: 1,
+                            pointStyle: 'star',
+                            pointRadius: 4
+                        },
+                        {
+                            label: "Neutral",
+                            data: [],
+                            backgroundColor: 'rgba(0, 0, 0, 0)',
+                            pointBorderColor: '#1565C0',
+                            pointBackgroundColor: '#1565C0',
+                            pointBorderWidth: 1,
+                            pointStyle: 'circle',
+                        },
+                        {
+                            label: "Negative",
+                            data: [],
+                            backgroundColor: 'rgba(0, 0, 0, 0)',
+                            pointBorderColor: '#C62828',
+                            pointBackgroundColor: '#C62828',
+                            pointBorderWidth: 1,
+                            pointStyle: 'cross',
+                            pointRadius: 4
+                        }   
+                    ]
+                    for (i = 0; i < sentiment_values.length; i++) {
+                        if (sentiment_values[i] == '-1') {
+                            obj = {}
+                            obj['x'] = date_values[i]
+                            obj['y'] = -1
+                            values[2].data.push(obj)
+                        } else if (sentiment_values[i] == '0') {
+                            obj = {}
+                            obj['x'] = date_values[i]
+                            obj['y'] = 0
+                            values[1].data.push(obj)
+                        } else if (sentiment_values[i] == '1') {
+                            obj = {}
+                            obj['x'] = date_values[i]
+                            obj['y'] = 1
+                            values[0].data.push(obj)
+                        }
+                    }
+                    return values
+                }
+                sentiment_over_time_graph_values = sentiment_over_time_graph_values.slice(0, -1)
+                sentiment_dates = sentiment_dates.slice(0, -1)
+                // Sentiment over time graph
+                var sentiment_over_time_graph = new Chart(sentiment_over_time_graph, {
+                    type: 'scatter',
+                    data: {
+                        datasets: sentiment_values_reader(sentiment_over_time_graph_values, sentiment_dates)
+                    },
+                    options: {}
+                });
+                // Tweets length over time graph
+                var tweets_len_over_time_graph = new Chart(tweets_len_over_time_graph, {
+                    type: 'line',
+                    data: {
+                        labels: dates.slice(0, -1),
+                        datasets: [
+                            {
+                                label: "Tweets Length",
+                                data: tweets_len_over_time_graph_values.slice(0, -1),
+                                borderColor: '#C2185B',
+                                backgroundColor: 'rgba(255, 5, 226, 0.53)',
+                                pointBorderColor: '#880E4F',
+                                pointBackgroundColor: '#880E4F',
+                                pointBorderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {}
+                });
+                // Retweets & Likes over time graph
+                var retweets_likes_over_time_graph = new Chart(retweets_likes_over_time_graph, {
+                    type: 'line',
+                    data: {
+                        labels: dates.slice(0, -1),
+                        datasets: [
+                            {
+                                label: "Retweets",
+                                data: retweets_over_time_graph_values.slice(0, -1),
+                                borderColor: '#1565C0',
+                                backgroundColor: 'rgba(0, 0, 0, 0)',
+                                pointBorderColor: '#0D47A1',
+                                pointBackgroundColor: '#0D47A1',
+                                pointBorderWidth: 1
+                            },
+                            {
+                                label: "Likes",
+                                data: likes_over_time_graph_values.slice(0, -1),
+                                borderColor: '#AD1457',
+                                backgroundColor: 'rgba(0, 0, 0, 0)',
+                                pointBorderColor: '#880E4F',
+                                pointBackgroundColor: '#880E4F',
+                                pointBorderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {}
+                });
+                //Define Scrollable List
+                var $el = $('.list');
+                $el.slimScroll({ destroy: true }).height("500");
+                $el.parent().find('.slimScrollBar, .slimScrollRail').remove();
+                $el.slimscroll({
+                    height: '500px',
+                    color: 'rgba(0,0,0,0.5)',
+                    size: '4px',
+                    alwaysVisible: false,
+                });
+            });
+        </script>
+    </body>
+</html>

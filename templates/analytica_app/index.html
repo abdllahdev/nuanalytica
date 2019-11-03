@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytica{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+            {% if all_tweets %}
+                <!-- Graphs % Tweets Section -->
+                <section>
+                    <div id="dates" values="{% for date in dates %}{{date}}|{%endfor%}"></div>
+                    <!-- Charts -->
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <div class="block-header">
+                                        <h1>CHARTS</h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Sentiment Chart -->
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                            <div class="card">
+                                <div class="header">
+                                    <h2>SENTIMENT ANALYSIS</h2>
+                                </div>
+                                <div class="body"><iframe class="chartjs-hidden-iframe" style="width: 100%; display: block; border: 0px; height: 0px; margin: 0px; position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px;"></iframe>
+                                    <canvas id="sentiment_graph" values="{{pie_chart.neu_tweets_percent}}|{{pie_chart.pos_tweets_percent}}|{{pie_chart.neg_tweets_percent}}" height="345" width="740" style="display: block; width: 740px; height: 370px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Sentiment over Time Chart -->
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                            <div class="card">
+                                <div class="header">
+                                    <h2>SENTIMENT ANALYSIS OVER TIME</h2>
+                                </div>
+                                <div class="body"><iframe class="chartjs-hidden-iframe" style="width: 100%; display: block; border: 0px; height: 0px; margin: 0px; position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px;"></iframe>
+                                    <canvas id="sentiment_over_time_graph" labels="" dates="{% for hour in sentiment_hours %}{{hour}}|{% endfor %}" values="{% for value in sentiment_values %}{{ value }}|{% endfor %}" height="345" width="740" style="display: block; width: 740px; height: 370px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- Tweets length over Time Chart -->
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                            <div class="card">
+                                <div class="header">
+                                    <h2>TWEETS LENGTH OVER TIME</h2>
+                                </div>
+                                <div class="body"><iframe class="chartjs-hidden-iframe" style="width: 100%; display: block; border: 0px; height: 0px; margin: 0px; position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px;"></iframe>
+                                    <canvas id="tweets_len_over_time_graph" values="{% for value in tweets_len_over_time_values %}{{value}}|{% endfor %}" height="370" width="740" style="display: block; width: 740px; height: 370px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Retweet % likes over Time Chart -->
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                            <div class="card">
+                                <div class="header">
+                                    <h2>RETWEETS VS LIKES OVER TIME</h2>
+                                </div>
+                                <div class="body"><iframe class="chartjs-hidden-iframe" style="width: 100%; display: block; border: 0px; height: 0px; margin: 0px; position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px;"></iframe>
+                                    <canvas id="retweets_likes_over_time_graph" rts-values="{% for value in rts_over_time_values %}{{value}}|{% endfor %}" likes-values="{% for value in likes_over_time_values %}{{value}}|{% endfor %}" height="370" width="740" style="display: block; width: 740px; height: 370px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Results Sections -->
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="block-header">
+                                <h1>RESULTS</h1>
+                            </div>
+                            <span><b>Max Retweets: {{max_retweets}}</b></span>
+                            <br>
+                            <span><b>Max Likes: {{max_likes}}</b></span>
+                            <br>
+                            <span><b>Tweets Length Mean: {{ tweets_length_mean }}</b></span>
+                        </div>
+                    </div>
+                    <!-- Tweets Sections -->
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="row">
+                                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+                                    <div class="block-header">
+                                        <h1>TWEETS</h1>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <!-- All tweets Sections -->
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="card tweets">
+                                        <div class="header">
+                                            ALL TWEETS
+                                        </div>
+                                        <div class="body">
+                                            <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 200px;">
+                                                <div class="list" heigth="100" style="height:200px; overflow: hidden; width: auto;">
+                                                    {% for tweet in all_tweets %}
+                                                        <div class="media">
+                                                            <div class="media-left">
+                                                                <img class="media-object" src="{{ tweet.usr_img_url }}" width="64" height="64">
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <h4 class="media-heading">
+                                                                    {{ tweet.usr_name }}                                        </h4>
+                                                                <p>{{ tweet.tweet }}</p>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                                <div class="slimScrollBar" style="background: rgba(0, 0, 0, 0.5); width: 4px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 0px; z-index: 99; right: 1px; height: 170.327px;"></div>
+                                                <div class="slimScrollRail" style="width: 5px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 0px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Neutral tweets Sections -->
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="card tweets">
+                                        <div class="header bg-blue">
+                                            NEUTRAL TWEETS
+                                        </div>
+                                        <div class="body">
+                                            <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 500px;">
+                                                <div class="list" style="overflow: hidden; width: auto;">
+                                                {% for tweet in neu_tweets %}
+                                                    <div class="body">
+                                                        <div class="media">
+                                                            <div class="media-left">
+                                                                <img class="media-object" src="{{ tweet.usr_img_url }}" width="64" height="64">
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <h4 class="media-heading">
+                                                                    {{ tweet.usr_name }}                                        </h4>
+                                                                <p>{{ tweet.tweet }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                                </div>
+                                                <div class="slimScrollBar" style="background: rgba(0, 0, 0, 0.5); width: 4px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 0px; z-index: 99; right: 1px; height: 170.327px;"></div>
+                                                <div class="slimScrollRail" style="width: 4px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 0px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <!-- Positive tweets Sections -->
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="card tweets">
+                                        <div class="header bg-green">
+                                            POSITIVE TWEETS
+                                        </div>
+                                        <div class="body">
+                                            <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 500px;">
+                                                <div class="list" style="overflow: hidden; width: auto;">
+                                                {% for tweet in pos_tweets %}
+                                                    <div class="body">
+                                                        <div class="media">
+                                                            <div class="media-left">
+                                                                <img class="media-object" src="{{ tweet.usr_img_url }}" width="64" height="64">
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <h4 class="media-heading">
+                                                                    {{ tweet.usr_name }}                                        </h4>
+                                                                <p>{{ tweet.tweet }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                                </div>
+                                                <div class="slimScrollBar" style="background: rgba(0, 0, 0, 0.5); width: 4px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 0px; z-index: 99; right: 1px; height: 170.327px;"></div>
+                                                <div class="slimScrollRail" style="width: 4px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 0px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Negative tweets Sections -->
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                    <div class="card tweets">
+                                        <div class="header bg-red">
+                                            NEGATIVE TWEETS
+                                        </div>
+                                        <div class="body">
+                                            <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 500px;">
+                                                <div class="list" style="overflow: hidden; width: auto;">
+                                                {% for tweet in neg_tweets %}
+                                                    <div class="body">
+                                                        <div class="media">
+                                                            <div class="media-left">
+                                                                <img class="media-object" src="{{ tweet.usr_img_url }}" width="64" height="64">
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <h4 class="media-heading">
+                                                                    {{ tweet.usr_name }}                                        </h4>
+                                                                <p>{{ tweet.tweet }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                                </div>
+                                                <div class="slimScrollBar" style="background: rgba(0, 0, 0, 0.5); width: 4px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 0px; z-index: 99; right: 1px; height: 170.327px;"></div>
+                                                <div class="slimScrollRail" style="width: 4px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 0px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            {% else %}
+                <style>
+                    div.search-box {
+                        width: 500px;
+                        margin: 150px 0 0 400px;
+                    }
+                </style>
+
+                <!-- SearchBox Sections -->
+                <div class="search-box">
+                    <div class="card">
+                        <div class="body">
+                            <form id="search" method="GET" novalidate="novalidate">
+                                <h2>Search for Hashtag</h2>
+                                {% if no_tweets %}
+                                    <div class="alert alert-danger">
+                                        <strong>Oh, no tweets in this hashtag!</strong>
+                                    </div>
+                                {% endif %}
+                                <div class="input-group">
+                                    <span class="input-group-addon">
+                                        <i class="material-icons">search</i>
+                                    </span>
+                                    <div class="form-line">
+                                        <input type="text" class="form-control" name="q" placeholder="Search" required="" autofocus="" aria-required="true">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-8"></div>
+                                    <div class="col-xs-4">
+                                        <button
+                                            id="search"
+                                            class="btn btn-block bg-green waves-effect"
+                                            type="submit">
+                                            SEARCH
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+    </div>
+{% endblock %}
